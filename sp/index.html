@@ -1,0 +1,69 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
+        integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ"
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div class="container">
+        <br>
+        <img height="100" src="https://s3-ap-northeast-1.amazonaws.com/gayagaya-dev-iijima/movies/imgs/douga_haishin_youtuber.png">
+        <img width="60%" src="https://s3-ap-northeast-1.amazonaws.com/gayagaya-dev-iijima/movies/imgs/HXoa8h7l.png">
+        <br><br>
+        <div id="alert"></div>
+        <div class="form">
+            <div class="form-group">
+                <input class="form-control-file" type="file" id="movie_file" accept="video/*">
+            </div>
+            <br /><br />
+            <div class="form-group">
+                <button class="btn btn-primary btn-lg btn-block" style="cursor: pointer;" type="submit" id="send-button" onclick="send()">送信</button>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="aws-sdk.min.js"></script>
+<script>
+    var ID_POOL_ID = '{ENTER_YOUR_SMARTPHONE_ID_POOLID}';
+    var BUCKET_NAME = '{ENTER_YOUR_UPLOAD_MOVIE_BUCKET_NAME}'
+    function send() {
+        if (document.getElementById('movie_file').value == '') {
+            return;
+        }
+
+        document.getElementById('alert').innerHTML = '';
+        document.getElementById('send-button').disabled = "true";
+        var s3 = new AWS.S3({ apiVersion: '2006-03-01' });
+
+        var params = {
+            Body: document.getElementById('movie_file').files[0],
+            Bucket: BUCKET_NAME,
+            Key: "input/" + Date.now() + Math.random()
+        };
+
+        s3.putObject(params, function (err, data) {
+            document.getElementById('movie_file').value = '';
+            var alert= '<div class="alert alert-success alert-dismissible fade show" role="alert"><strong>動画を送信しました!</strong><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
+            document.getElementById('alert').innerHTML = alert;
+            document.getElementById('send-button').disabled = "";
+        });
+
+    }
+
+    AWS.config.region = 'ap-northeast-1'; // リージョン
+    AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+        IdentityPoolId: ID_POOL_ID,
+    });
+</script>
+
+</html>
